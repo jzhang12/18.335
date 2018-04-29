@@ -1,2 +1,4 @@
 *.ipynb
 .ipynb_checkpoints/*.ipynb
+Notebook/*.ipynb
+Notebook/.ipynb_checkpoints/*.ipynb
