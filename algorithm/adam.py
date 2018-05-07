@@ -1,4 +1,8 @@
 import math
+import numpy as np
+from numpy import linalg
+import matplotlib.pyplot as plt
+import copy
 
 alpha = 0.01
 beta_1 = 0.9
@@ -17,20 +21,13 @@ def grad_func(A, x):#calculates the gradient
     return A
 
 def adam(A, x, b, lr = 1e-4, tol = 1e-5, nmax = 1e6):
-    r = b-func(A, x)
+    r = b-A.dot(x)
     iter_num = 0
     res = [linalg.norm(r)/linalg.norm(b)]
     while iter_num < nmax:
         if res[iter_num] < tol:
             break
-        iter_num += 1
-        x = x + 2*lr*np.dot(np.transpose(A),r)
-        r = b-A.dot(x)
-        res.append(linalg.norm(r)/linalg.norm(b))
-    return res, n, x
-
-    while (1):
-        t+=1
+        iter_num+=1
         g_t = grad_func(A, theta_0)
         m_t = beta_1*m_t + (1-beta_1)*g_t
         v_t = beta_2*v_t + (1-beta_2)*(g_t*g_t)
@@ -41,3 +38,5 @@ def adam(A, x, b, lr = 1e-4, tol = 1e-5, nmax = 1e6):
         print(theta_0)
         if(theta_0 == theta_0_prev):
             break
+        res.append(linalg.norm(r)/linalg.norm(b))
+    return res, n, x, "ADAM"

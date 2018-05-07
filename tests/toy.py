@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import sgd
 import gd
 import cgd
+import adam
 
 def toy_obj_fact(A, b):
 	def toy_obj(x):
@@ -33,6 +34,9 @@ def run_toy_experiment(A, b, x, algo_string):
 	elif algo_string == "CGD":
 		algo = cgd.cgd
 		grad = toy_grad_fact(A, b)
+	elif algo_string == "ADAM":
+		algo = adam.adam
+		grad = toy_grad_fact(A, b)
 	else:
 		print("INVALID ALGO")
 		return
@@ -48,3 +52,4 @@ x = np.array([[0],[0]])
 run_toy_experiment(A,b,x, "SGD")
 run_toy_experiment(A,b,x, "GD")
 run_toy_experiment(A,b,x, "CGD")
+run_toy_experiment(A,b,x, "ADAM")
