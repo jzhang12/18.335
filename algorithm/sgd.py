@@ -3,15 +3,18 @@ from numpy import linalg
 import matplotlib.pyplot as plt
 import copy
 
-def sgd(A, b, x, lr = 1e-2, eps = 1e-7, nmax = 1e3):
-    r = b-A.dot(x)
+def sgd(obj, grad, x, A, lr = 1e-2, eps = 1e-7, nmax = 1e3):
+    n, m = A.shape
+    r = obj(x)
     iter_num = 0
     res = [linalg.norm(r)]
     while iter_num < nmax:
-        iter_num += 1
-        x = x + 2*lr*np.dot(np.transpose(A),r)
-        r = b-A.dot(x)
+        i = iter_num % n
+        x = x + lr*grad(x, i)
+        r = obj(x)
         res.append(linalg.norm(r))
-        if abs(res[iter_num]-res[iter_num-1]) < eps:
-            break
+        iter_num += 1
+        if iter_num >= n:
+            if abs(np.mean(res[iter_num-n+1:iter_num+1])-np.mean(res[iter_num-n:iter_num])) < eps:
+                break
     return res, iter_num, x, "SGD"
