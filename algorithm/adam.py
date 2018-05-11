@@ -9,14 +9,9 @@ beta_1 = 0.9
 beta_2 = 0.999
 epsilon = 1e-8
 
-# def func(A, x):
-#     return A.dot(x)
-
-# def grad_func(A, x):#calculates the gradient
-#     return A
 
 def adam(obj, grad, x, A, lr = 1e-4, tol = 1e-5, nmax = 1e6):
-    theta_0 = [0, 0]
+    theta_0 = 0
     m_t = 0 
     v_t = 0 
     iter_num = 0
@@ -34,8 +29,8 @@ def adam(obj, grad, x, A, lr = 1e-4, tol = 1e-5, nmax = 1e6):
         m_cap = m_t/(1-(beta_1**iter_num))
         v_cap = v_t/(1-(beta_2**iter_num))
         theta_0_prev = theta_0
-        print("m_cap", m_cap)
-        print("bottom", (alpha*m_cap)/(np.sqrt(v_cap)+epsilon))
+        print("theta_0_prev", theta_0_prev)
+        print("top", m_t)
         theta_0 = theta_0 - (alpha*m_cap)/(np.sqrt(v_cap)+epsilon)
         print("theta_0", theta_0)
         if(theta_0 == theta_0_prev):
