@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg
 import matplotlib.pyplot as plt
 import copy
 
@@ -40,9 +39,8 @@ def line_search(grad, x, d, threshold = 1e-3):
             upper_index = new_index
 
 def cgd(obj, grad, x, A, eps = 1e-7, nmax = 1e3):
-    r = obj(x)
     iter_num = 0
-    res = [linalg.norm(r)]
+    res = [obj(x)]
     d = -grad(x)
     while iter_num < nmax:
         iter_num += 1
@@ -55,8 +53,7 @@ def cgd(obj, grad, x, A, eps = 1e-7, nmax = 1e3):
         beta = max(beta_pr[0][0], 0)
         d = beta*d-new_grad
         x = new_x
-        r = obj(x)
-        res.append(linalg.norm(r))
+        res.append(obj(x))
         if abs(res[iter_num]-res[iter_num-1]) < eps:
             break
     return res, iter_num, x, "CGD"

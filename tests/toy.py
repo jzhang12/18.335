@@ -2,6 +2,7 @@ import sys
 sys.path.insert(0, '../algorithm')
 
 import numpy as np
+from numpy import linalg
 import matplotlib.pyplot as plt
 import sgd
 import gd
@@ -10,7 +11,7 @@ import adam
 
 def toy_obj_fact(A, b):
 	def toy_obj(x):
-		return b - A.dot(x)
+		return linalg.norm(b - A.dot(x))
 	return toy_obj
 
 def toy_grad_fact(A, b):
