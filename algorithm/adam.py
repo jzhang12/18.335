@@ -16,7 +16,7 @@ epsilon = 1e-8
 #     return A
 
 def adam(obj, grad, x, A, lr = 1e-4, tol = 1e-5, nmax = 1e6):
-    theta_0 = 0
+    theta_0 = [0, 0]
     m_t = 0 
     v_t = 0 
     iter_num = 0
@@ -34,9 +34,10 @@ def adam(obj, grad, x, A, lr = 1e-4, tol = 1e-5, nmax = 1e6):
         m_cap = m_t/(1-(beta_1**iter_num))
         v_cap = v_t/(1-(beta_2**iter_num))
         theta_0_prev = theta_0
-        print(m_cap)
-        theta_0 = theta_0 - (alpha*m_cap)/(math.sqrt(v_cap)+epsilon)
-        print(theta_0)
+        print("m_cap", m_cap)
+        print("bottom", (alpha*m_cap)/(np.sqrt(v_cap)+epsilon))
+        theta_0 = theta_0 - (alpha*m_cap)/(np.sqrt(v_cap)+epsilon)
+        print("theta_0", theta_0)
         if(theta_0 == theta_0_prev):
             break
         res.append(linalg.norm(r)/linalg.norm(b))
