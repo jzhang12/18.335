@@ -77,4 +77,4 @@ def scgd(obj, grad, x, A, batch_size = 2, eps = 1e-7, nmax = 1e2):
         res.append(obj(x))
         if abs(res[iter_num]-res[iter_num-1]) < eps:
             break
-    return res, iter_num, x, "SGD"
+    return res, iter_num, x, "SCGD"
