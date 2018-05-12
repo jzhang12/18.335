@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
-def line_search(grad, x, d, threshold = 1e-3):
+def line_search(grad, x, d, threshold = 1e-3, max_iter = 5e3):
     def g(a):
         return np.dot(np.transpose(d), grad(x+a*d))[0][0]
     lower_index = 0
@@ -26,17 +26,20 @@ def line_search(grad, x, d, threshold = 1e-3):
     if upper_index < lower_index:
         upper_index, lower_index = lower_index, upper_index
         upper_bound, lower_bound = lower_bound, upper_bound
-    while True:
+    i = 0
+    while i < max_iter:
         new_index = (upper_index+lower_index)/2.0
         new_bound = g(new_index)
         if abs(new_bound) < threshold:
-            return new_index
+            break
         elif np.sign(lower_bound) == np.sign(new_bound):
             lower_bound = new_bound
             lower_index = new_index
         else:
             upper_bound = new_bound
             upper_index = new_index
+        i += 1
+    return new_index
 
 def cgd(obj, grad, x, A, eps = 1e-7, nmax = 1e3):
     iter_num = 0
@@ -58,7 +61,7 @@ def cgd(obj, grad, x, A, eps = 1e-7, nmax = 1e3):
             break
     return res, iter_num, x, "CGD"
 
-def scgd(obj, grad, x, A, batch_size = 2, eps = 1e-7, nmax = 1e2):
+def scgd(obj, grad, x, A, eps = 1e-7, nmax = 1e2):
     n, m = A.shape
     iter_num = 0
     res = [obj(x)]

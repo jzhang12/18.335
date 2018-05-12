@@ -7,8 +7,7 @@ def sgd(obj, grad, x, A, lr = 1e-2, eps = 1e-7, nmax = 1e3):
     iter_num = 0
     res = [obj(x)]
     while iter_num < nmax:
-        i = iter_num % n
-        x = x + lr*grad(x, i)
+        x = x + lr*grad(x)
         res.append(obj(x))
         iter_num += 1
         if iter_num >= n:
