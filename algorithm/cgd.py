@@ -2,9 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
-def line_search(grad, x, d, threshold = 1e-3, max_iter = 5e3):
+def line_search(grad, x, d, threshold = 1e-2, max_iter = 5000):
     def g(a):
-        return np.dot(np.transpose(d), grad(x+a*d))[0][0]
+        return np.dot(np.transpose(d), grad(x+a*d)) # uncomment if using mnist
+        # return np.dot(np.transpose(d), grad(x+a*d))[0][0] # uncomment if using random or toy
     lower_index = 0
     lower_bound = g(0)
     if abs(lower_bound) < threshold:
@@ -28,6 +29,7 @@ def line_search(grad, x, d, threshold = 1e-3, max_iter = 5e3):
         upper_bound, lower_bound = lower_bound, upper_bound
     i = 0
     while i < max_iter:
+        print "line_search : "+str(i)
         new_index = (upper_index+lower_index)/2.0
         new_bound = g(new_index)
         if abs(new_bound) < threshold:
@@ -41,11 +43,12 @@ def line_search(grad, x, d, threshold = 1e-3, max_iter = 5e3):
         i += 1
     return new_index
 
-def cgd(obj, grad, x, A, eps = 1e-7, nmax = 1e3):
+def cgd(obj, grad, x, A, eps = 1e-3, nmax = 1e2):
     iter_num = 0
     res = [obj(x)]
     d = -grad(x)
     while iter_num < nmax:
+        print iter_num
         iter_num += 1
         alpha = line_search(grad, x, d)
         new_x = x + alpha*d
@@ -53,7 +56,8 @@ def cgd(obj, grad, x, A, eps = 1e-7, nmax = 1e3):
         new_grad = grad(new_x)
         grad_diff = new_grad-old_grad
         beta_pr = np.dot(np.transpose(new_grad), grad_diff)/np.dot(np.transpose(old_grad), old_grad)
-        beta = max(beta_pr[0][0], 0)
+        # beta = max(beta_pr[0][0], 0) # uncomment if using random or toy
+        beta = max(beta_pr, 0) # uncomment if using mnist
         d = beta*d-new_grad
         x = new_x
         res.append(obj(x))
@@ -61,12 +65,13 @@ def cgd(obj, grad, x, A, eps = 1e-7, nmax = 1e3):
             break
     return res, iter_num, x, "CGD"
 
-def scgd(obj, grad, x, A, eps = 1e-7, nmax = 1e2):
+def scgd(obj, grad, x, A, eps = 1e-3, nmax = 1e2):
     n, m = A.shape
     iter_num = 0
     res = [obj(x)]
     d = -grad(x)
     while iter_num < nmax:
+        print iter_num
         iter_num += 1
         alpha = line_search(grad, x, d)
         new_x = x + alpha*d
@@ -74,7 +79,8 @@ def scgd(obj, grad, x, A, eps = 1e-7, nmax = 1e2):
         new_grad = grad(new_x)
         grad_diff = new_grad-old_grad
         beta_pr = np.dot(np.transpose(new_grad), grad_diff)/np.dot(np.transpose(old_grad), old_grad)
-        beta = max(beta_pr[0][0], 0)
+        # beta = max(beta_pr[0][0], 0) # uncomment if using random or toy
+        beta = max(beta_pr, 0) # uncomment if using mnist
         d = beta*d-new_grad
         x = new_x
         res.append(obj(x))

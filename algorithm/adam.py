@@ -11,7 +11,7 @@ beta_2 = 0.999
 epsilon = 1e-8
 
 
-def adam(obj, grad, init_x, lr = 1e-4, tol = 1e-5, nmax = 1e6):
+def adam(obj, grad, init_x, lr = 1e-3, tol = 1e-5, nmax = 1e6):
     x = init_x
     m = np.zeros_like(x)
     v = np.zeros_like(x)
@@ -25,7 +25,7 @@ def adam(obj, grad, init_x, lr = 1e-4, tol = 1e-5, nmax = 1e6):
         v = beta_2*v + (1-beta_2)*dx**2
         m_cap = m/(1-(beta_1**iter_num))
         v_cap = v/(1-(beta_2**iter_num))
-        x = x + (alpha*m_cap)/(np.sqrt(v_cap) + epsilon)
+        x = x - (alpha*m_cap)/(np.sqrt(v_cap) + epsilon)
         res.append(obj(x))
     
     return res, iter_num, x, "ADAM"
