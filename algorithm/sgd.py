@@ -2,12 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
-def sgd(obj, grad, x, A, lr = 1e-3, eps = 1e-3, nmax = 1e2):
+def sgd(obj, grad, x, A, lr = 1e-3, eps = 1e-3, nmax = 1e4):
     n, m = A.shape
     iter_num = 0
     res = [obj(x)]
     while iter_num < nmax:
-        print iter_num
+        if iter_num%10 == 0:
+            print "Iteration "+str(iter_num)+ " Accuracy: " + str(res[iter_num])
         x = x - lr*grad(x)
         res.append(obj(x))
         iter_num += 1

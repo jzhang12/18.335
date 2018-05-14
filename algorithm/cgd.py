@@ -29,7 +29,7 @@ def line_search(grad, x, d, threshold = 1e-2, max_iter = 5000):
         upper_bound, lower_bound = lower_bound, upper_bound
     i = 0
     while i < max_iter:
-        print "line_search : "+str(i)
+        # print "line_search : "+str(i)
         new_index = (upper_index+lower_index)/2.0
         new_bound = g(new_index)
         if abs(new_bound) < threshold:
@@ -48,7 +48,7 @@ def cgd(obj, grad, x, A, eps = 1e-3, nmax = 1e2):
     res = [obj(x)]
     d = -grad(x)
     while iter_num < nmax:
-        print iter_num
+        print "Iteration "+str(iter_num)+ " Accuracy: " + str(res[iter_num])
         iter_num += 1
         alpha = line_search(grad, x, d)
         new_x = x + alpha*d
@@ -71,7 +71,7 @@ def scgd(obj, grad, x, A, eps = 1e-3, nmax = 1e2):
     res = [obj(x)]
     d = -grad(x)
     while iter_num < nmax:
-        print iter_num
+        print "Iteration "+str(iter_num)+ " Accuracy: " + str(res[iter_num])
         iter_num += 1
         alpha = line_search(grad, x, d)
         new_x = x + alpha*d

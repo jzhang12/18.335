@@ -21,7 +21,7 @@ def finite_diff_fact(obj):
         return central
     return finite_diff
 
-def logistic_fact(A, b, l, batch_size = 5):
+def logistic_fact(A, b, l, batch_size = 10):
     n, m = A.shape
     A_temp = A
     A = np.ones((A.shape[0], A.shape[1]+1))
@@ -33,11 +33,14 @@ def logistic_fact(A, b, l, batch_size = 5):
         return fd_grad(w)
     def stochastic_logistic_grad(w):
         batch = np.random.choice(n, batch_size, replace = False)
-        obj = np.sum(np.log(1+np.exp(np.multiply(-1*b[batch], np.dot(A[batch], w).reshape(b[batch].shape))))) + l*np.sum(w[1:]*w[1:])
-        stochastic_fd_grad = finite_diff_fact(logistic_obj)
+        def s_obj(w):
+            return np.sum(np.log(1+np.exp(np.multiply(-1*b[batch], np.dot(A[batch], w).reshape(b[batch].shape))))) + l*np.sum(w[1:]*w[1:])
+        stochastic_fd_grad = finite_diff_fact(s_obj)
         return stochastic_fd_grad(w)
     return logistic_obj, logistic_grad, stochastic_logistic_grad
 
+# pos = ['0', '2', '4', '6', '8']
+# neg = ['1', '3', '5', '7', '9']
 pos = ['0']
 neg = ['1']
 
@@ -72,7 +75,6 @@ test_labels = np.vstack((np.ones((150*len(pos), 1)), -1*np.ones((150*len(neg), 1
 obj, grad, sgrad = logistic_fact(train, train_labels, 0.0)
 w_0 = np.zeros(train.shape[1]+1)
 
-# h.run_experiment(train,train_labels,w_0, "GD", "Toy")
 # res, n, x1, title = gd.gd(obj, grad, w_0, train)
 # res, n, x1, title = cgd.cgd(obj, grad, w_0, train)
 # res, n, x1, title = sgd.sgd(obj, sgrad, w_0, train)

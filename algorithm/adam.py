@@ -11,14 +11,16 @@ beta_2 = 0.999
 epsilon = 1e-8
 
 
-def adam(obj, grad, init_x, lr = 1e-3, tol = 1e-5, nmax = 1e6):
+def adam(obj, grad, init_x, lr = 1e-4, tol = 1e-5, nmax = 1e6):
     x = init_x
     m = np.zeros_like(x)
     v = np.zeros_like(x)
     r = obj(x)
     res = [r]
     iter_num = 0
-    while iter_num < nmax and (len(res)<2 or res[-2]-res[-1] > tol):
+    while iter_num < nmax and (len(res)<2 or abs(res[-2]-res[-1]) > tol):
+        # if iter_num%10 == 0:
+        print "Iteration "+str(iter_num)+ " Accuracy: " + str(res[iter_num])
         dx = grad(x)
         iter_num +=1
         m = beta_1*m + (1-beta_1)*dx
