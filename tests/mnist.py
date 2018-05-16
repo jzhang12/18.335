@@ -39,10 +39,10 @@ def logistic_fact(A, b, l, batch_size = 10):
         return stochastic_fd_grad(w)
     return logistic_obj, logistic_grad, stochastic_logistic_grad
 
-# pos = ['0', '2', '4', '6', '8']
-# neg = ['1', '3', '5', '7', '9']
-pos = ['0']
-neg = ['1']
+pos = ['0', '2', '4', '6', '8']
+neg = ['1', '3', '5', '7', '9']
+# pos = ['0']
+# neg = ['1']
 
 ds = np.loadtxt('data/mnist_digit_'+pos[0]+'.csv')
 train = ds[:200,:]
@@ -77,12 +77,15 @@ w_0 = np.zeros(train.shape[1]+1)
 
 # res, n, x1, title = gd.gd(obj, grad, w_0, train)
 # res, n, x1, title = cgd.cgd(obj, grad, w_0, train)
-# res, n, x1, title = sgd.sgd(obj, sgrad, w_0, train)
+res, n, x1, title = sgd.sgd(obj, sgrad, w_0, train, nmax = 1e2)
 # res, n, x1, title = cgd.scgd(obj, sgrad, w_0, train)
-res, n, x1, title = adam.adam(obj, sgrad, w_0, train)
+res1, n, x1, title = sgd.sngd(obj, sgrad, w_0, train, nmax = 1e2)
+res2, n, x1, title = adam.adam(obj, sgrad, w_0, train, nmax = 1e2)
 
 title = "MNIST Dataset: "+ title + " Error vs Iteration"
 plt.plot(res)
+plt.plot(res1)
+plt.plot(res2)
 plt.title(title)
 plt.show()
 

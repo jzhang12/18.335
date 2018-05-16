@@ -44,11 +44,49 @@ def run_experiment(A, b, x, algo_string, data_set):
     elif algo_string == "ADAM":
         algo = adam.adam
         grad = stochastic_toy_grad_i_fact(A, b)
+    elif algo_string == "SNGD":
+        algo = sgd.sngd
+        grad = stochastic_toy_grad_i_fact(A, b)
     else:
         print("INVALID ALGO")
         return
     res, n, x1, title = algo(obj, grad, x, A)
     title = data_set + " Dataset: "+ title + " Error vs Iteration"
     plt.plot(res)
+    plt.title(title)
+    plt.show()
+
+def run_experiments(A, b, x, algos_list, data_set, iterations = None):
+    obj = toy_obj_fact(A, b)
+    title_list = ""
+    for algo_string in algos_list:
+        if algo_string == "SGD":
+            algo = sgd.sgd
+            grad = stochastic_toy_grad_i_fact(A,b)
+        elif algo_string == "GD":
+            algo = gd.gd
+            grad = toy_grad_fact(A, b)
+        elif algo_string == "CGD":
+            algo = cgd.cgd
+            grad = toy_grad_fact(A, b)
+        elif algo_string == "SCGD":
+            algo = cgd.scgd
+            grad = stochastic_toy_grad_i_fact(A, b)
+        elif algo_string == "ADAM":
+            algo = adam.adam
+            grad = stochastic_toy_grad_i_fact(A, b)
+        elif algo_string == "SNGD":
+            algo = sgd.sngd
+            grad = stochastic_toy_grad_i_fact(A, b)
+        else:
+            print("INVALID ALGO")
+            return
+        if iterations:
+            res, n, x1, title = algo(obj, grad, x, A, nmax = iterations)
+        else:
+            res, n, x1, title = algo(obj, grad, x, A)
+        plt.plot(res)
+        title_list += title + ", "
+    title = data_set + " Dataset: "+ title_list+ "Error vs Iteration"
     plt.title(title)
     plt.show()
