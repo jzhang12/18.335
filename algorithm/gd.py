@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
+import time
 
 def gd(obj, grad, x, A, lr = 1e-4, eps = 1e-2, nmax = 3e2):
     iter_num = 0

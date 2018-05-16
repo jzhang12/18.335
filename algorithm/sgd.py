@@ -1,37 +1,50 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
+import time
 
-def sgd(obj, grad, x, A, lr = 1e-3, eps = 1e-3, nmax = 1e4):
-    n, m = A.shape
+def sgd(obj, optimizer, x, score = None, lr = 1e-3, num_epoch = 20):
     iter_num = 0
-    res = [obj(x)]
-    while iter_num < nmax:
-        if iter_num%10 == 0:
-            print "Iteration "+str(iter_num)+ " Accuracy: " + str(res[iter_num])
-        x = x - lr*grad(x)
-        res.append(obj(x))
+    err = [obj(x)]
+    if score is not None:
+        acc = [score(x)]
+    start = time.time()
+    times = [0]
+    epochs = [0]
+    while iter_num < num_epoch:
+        print "Epoch "+str(iter_num)+ ", Error: " + str(err[iter_num])
         iter_num += 1
-        # if iter_num >= n:
-            # if abs(np.mean(res[iter_num-n+1:iter_num+1])-np.mean(res[iter_num-n:iter_num])) < eps:
-                # break
-    return res, iter_num, x, "SGD"
+        x = optimizer(x, lr)
+        err.append(obj(x))
+        if score is not None:
+            acc.append(score(x))
+        times.append(time.time() - start)
+        epochs.append(iter_num)
+    if score is not None:
+        return err, acc, times, epochs, "SGD"
+    return err, times, epochs, "SGD"
 
-def sngd(obj, grad, x, A, lr = 1e-3, mu = 0.9, eps = 1e-3, nmax = 1e4):
-    n, m = A.shape
+
+def sngd(obj, grad, x, score = None, lr = 1e-3, num_epoch = 20):
     iter_num = 0
-    res = [obj(x)]
+    err = [obj(x)]
+    if score is not None:
+        acc = [score(x)]
+    start = time.time()
+    times = [0]
+    epochs = [0]
     v = np.zeros(x.shape)
     v_prev = np.zeros(x.shape)
-    while iter_num < nmax:
-        if iter_num%10 == 0:
-            print "Iteration "+str(iter_num)+ " Accuracy: " + str(res[iter_num])
-        v_prev = v
-        v = mu * v - lr*grad(x)
-        x = x - mu*v_prev + (1+mu) * v
-        res.append(obj(x))
+    prev_grads = np.zeros_like(x)
+    while iter_num < num_epoch:
+        print "Epoch "+str(iter_num)+ ", Error: " + str(err[iter_num])
         iter_num += 1
-        # if iter_num >= n:
-            # if abs(np.mean(res[iter_num-n+1:iter_num+1])-np.mean(res[iter_num-n:iter_num])) < eps:
-                # break
-    return res, iter_num, x, "SNGD"
+        x, prev_grads = grad(x, lr, prev_grads)
+        err.append(obj(x))
+        if score is not None:
+            acc.append(score(x))
+        times.append(time.time() - start)
+        epochs.append(iter_num)
+    if score is not None:
+        return err, acc, times, epochs, "SNGD"
+    return err, times, epochs, "SNGD"

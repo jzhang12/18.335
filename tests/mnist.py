@@ -5,6 +5,7 @@ import gd
 import sgd
 import cgd
 import adam
+import helper as h
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -31,18 +32,33 @@ def logistic_fact(A, b, l, batch_size = 10):
     fd_grad = finite_diff_fact(logistic_obj)
     def logistic_grad(w):
         return fd_grad(w)
-    def stochastic_logistic_grad(w):
-        batch = np.random.choice(n, batch_size, replace = False)
+    def stochastic_logistic_grad(w, batch):
         def s_obj(w):
             return np.sum(np.log(1+np.exp(np.multiply(-1*b[batch], np.dot(A[batch], w).reshape(b[batch].shape))))) + l*np.sum(w[1:]*w[1:])
         stochastic_fd_grad = finite_diff_fact(s_obj)
         return stochastic_fd_grad(w)
     return logistic_obj, logistic_grad, stochastic_logistic_grad
 
-pos = ['0', '2', '4', '6', '8']
-neg = ['1', '3', '5', '7', '9']
-# pos = ['0']
-# neg = ['1']
+
+# Define the predictLR(x) function, which uses trained parameters
+def predictLR(X, w):
+    return np.sign(1.0/(1+np.exp(-(np.dot(X,w[1:])+w[0])))-0.5).reshape(X.shape[0],1)
+
+def scoreLR(predict, truth):
+    results = (predict == truth)
+    # indexes = np.where(predict!=truth)
+    return float(np.sum(results))/truth.size
+
+def score_fxn_fact(data, label):
+    def score_fxn(params):
+        predicted = predictLR(data, params)
+        return scoreLR(predicted, label)
+    return score_fxn
+
+# pos = ['0', '2', '4', '6', '8']
+# neg = ['1', '3', '5', '7', '9']
+pos = ['0']
+neg = ['1']
 
 ds = np.loadtxt('data/mnist_digit_'+pos[0]+'.csv')
 train = ds[:200,:]
@@ -72,33 +88,49 @@ train_labels = np.vstack((np.ones((200*len(pos), 1)), -1*np.ones((200*len(neg), 
 # dev_labels = np.vstack((np.ones((150*len(pos), 1)), -1*np.ones((150*len(neg), 1))))
 test_labels = np.vstack((np.ones((150*len(pos), 1)), -1*np.ones((150*len(neg), 1))))
 
+score_fxn = score_fxn_fact(train, train_labels)
+
 obj, grad, sgrad = logistic_fact(train, train_labels, 0.0)
+sgd_opt = h.stochastic_optimizer(train, train_labels, sgrad)
+nesterov_opt = h.nesterov_optimizer(train, train_labels, sgrad)
+adam_opt = h.adam_optimizer(train, train_labels, sgrad)
 w_0 = np.zeros(train.shape[1]+1)
 
-# res, n, x1, title = gd.gd(obj, grad, w_0, train)
-# res, n, x1, title = cgd.cgd(obj, grad, w_0, train)
-res, n, x1, title = sgd.sgd(obj, sgrad, w_0, train, nmax = 1e2)
-# res, n, x1, title = cgd.scgd(obj, sgrad, w_0, train)
-res1, n, x1, title = sgd.sngd(obj, sgrad, w_0, train, nmax = 1e2)
-res2, n, x1, title = adam.adam(obj, sgrad, w_0, train, nmax = 1e2)
+err_sgd, acc_sgd, times_sgd, epochs_sgd, title_sgd = sgd.sgd(obj, sgd_opt, w_0, score_fxn)
+err_sngd, acc_sngd, times_sngd, epochs_sngd, title_sngd = sgd.sngd(obj, nesterov_opt, w_0, score_fxn)
+err_adam, acc_adam, times_adam, epochs_adam, title_adam = adam.adam(obj, adam_opt, w_0, score_fxn)
 
-title = "MNIST Dataset: "+ title + " Error vs Iteration"
-plt.plot(res)
-plt.plot(res1)
-plt.plot(res2)
+title = "MNIST Dataset: " + " Error vs Epoch"
+plt.plot(epochs_sgd, err_sgd, label = title_sgd)
+plt.plot(epochs_sngd, err_sngd, label = title_sngd)
+plt.plot(epochs_adam, err_adam, label = title_adam)
+plt.legend()
 plt.title(title)
 plt.show()
 
-# Define the predictLR(x) function, which uses trained parameters
-def predictLR(X, w):
-    return np.sign(1.0/(1+np.exp(-(np.dot(X,w[1:])+w[0])))-0.5).reshape(X.shape[0],1)
+title = "MNIST Dataset: " + " Error vs Time"
+plt.plot(times_sgd, err_sgd, label = title_sgd)
+plt.plot(times_sngd, err_sngd, label = title_sngd)
+plt.plot(times_adam, err_adam, label = title_adam)
+plt.legend()
+plt.title(title)
+plt.show()
 
-def scoreLR(predict, truth):
-    results = (predict == truth)
-    indexes = np.where(predict!=truth)
-    return float(np.sum(results))/truth.size, indexes
+title = "MNIST Dataset: " + " Accuracy vs Epoch"
+plt.plot(epochs_sgd, acc_sgd, label = title_sgd)
+plt.plot(epochs_sngd, acc_sngd, label = title_sngd)
+plt.plot(epochs_adam, acc_adam, label = title_adam)
+plt.legend()
+plt.title(title)
+plt.show()
 
-predict_train = predictLR(train, x1)
-print scoreLR(predict_train, train_labels)[0]
+title = "MNIST Dataset: " + " Accuracy vs Time"
+plt.plot(times_sgd, acc_sgd, label = title_sgd)
+plt.plot(times_sngd, acc_sngd, label = title_sngd)
+plt.plot(times_adam, acc_adam, label = title_adam)
+plt.legend()
+plt.title(title)
+plt.show()
+
 predict_test = predictLR(test, x1)
-print scoreLR(predict_test, test_labels)[0]
+print scoreLR(predict_test, test_labels)
