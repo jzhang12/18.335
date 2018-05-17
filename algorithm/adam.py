@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import copy
 import time
 
+# @profile
 def adam(obj, grad, x, score = None, lr = 1e-3, num_epoch = 20):
     epoch_num = 0
     batch_num = 1

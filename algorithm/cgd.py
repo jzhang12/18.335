@@ -5,8 +5,8 @@ import time
 
 def line_search(grad, x, d, threshold = 1e-2, max_iter = 5000):
     def g(a):
-        return np.dot(np.transpose(d), grad(x+a*d)) # uncomment if using mnist
-        # return np.dot(np.transpose(d), grad(x+a*d))[0][0] # uncomment if using random or toy
+        # return np.dot(np.transpose(d), grad(x+a*d)) # uncomment if using mnist
+        return np.dot(np.transpose(d), grad(x+a*d))[0][0] # uncomment if using random or toy
     lower_index = 0
     lower_bound = g(0)
     if abs(lower_bound) < threshold:
@@ -57,8 +57,8 @@ def cgd(obj, grad, x, A, eps = 1e-3, nmax = 1e2):
         new_grad = grad(new_x)
         grad_diff = new_grad-old_grad
         beta_pr = np.dot(np.transpose(new_grad), grad_diff)/np.dot(np.transpose(old_grad), old_grad)
-        # beta = max(beta_pr[0][0], 0) # uncomment if using random or toy
-        beta = max(beta_pr, 0) # uncomment if using mnist
+        beta = max(beta_pr[0][0], 0) # uncomment if using random or toy
+        # beta = max(beta_pr, 0) # uncomment if using mnist
         d = beta*d-new_grad
         x = new_x
         res.append(obj(x))
@@ -66,6 +66,7 @@ def cgd(obj, grad, x, A, eps = 1e-3, nmax = 1e2):
             break
     return res, iter_num, x, "CGD"
 
+# @profile
 def scgd(obj, grad, x, score = None, num_epoch = 20):
     iter_num = 0
     err = [obj(x)]
@@ -82,8 +83,8 @@ def scgd(obj, grad, x, score = None, num_epoch = 20):
         new_grad = grad(new_x)
         grad_diff = new_grad-old_grad
         beta_pr = np.dot(np.transpose(new_grad), grad_diff)/np.dot(np.transpose(old_grad), old_grad)
-        beta = max(beta_pr, 0) # uncomment if using mnist
-        # beta = max(beta_pr[0][0], 0) # uncomment if using random or toy
+        # beta = max(beta_pr, 0) # uncomment if using mnist
+        beta = max(beta_pr[0][0], 0) # uncomment if using random or toy
         d = beta*d-new_grad
         x = new_x
         err.append(obj(x))

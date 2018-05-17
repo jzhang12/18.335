@@ -62,9 +62,9 @@ def nesterov_optimizer(A, b, gradient, batch_size = 256, momentum = 0.9):
             left = i * batch_size
             right = min((i + 1) * batch_size, n)
             batch = ids[left:right]
-            delta = gradient(x,batch)/(right - left)
-            grad = momentum * prev_grads - lr * delta
-            x += -momentum * prev_grads + (1 + momentum) * grad
+            delta = gradient(x-momentum*prev_grads,batch)/(right - left)
+            grad = momentum * prev_grads + lr * delta
+            x += grad
             prev_grads = grad
 
         return x, prev_grads
@@ -151,11 +151,10 @@ def run_experiment(A, b, x, data_set, plot = True):
     output["ADAM"] = (adam_err, adam_times, adam_epochs)
 
     if plot:
-        plt.plot(sgd_epochs, sgd_err, "b-", label = sgd_title)
-        plt.plot(scgd_epochs, scgd_err, "r-", label = scgd_title)
-        plt.plot(sngd_epochs, sngd_err, "g-", label = sngd_title)
-        plt.plot(adam_epochs, adam_err, "m-", label = adam_title)
-
+        SMALL_SIZE = 14
+        MEDIUM_SIZE = 16
+        BIGGER_SIZE = 18
+        
         title_epoch = data_set + " Dataset: Error vs Epoch"
         plt.title(title_epoch)
         plt.ylabel('Error')

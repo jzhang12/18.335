@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import copy
 import time
 
+# @profile
 def sgd(obj, optimizer, x, score = None, lr = 1e-3, num_epoch = 20):
     iter_num = 0
     err = [obj(x)]
@@ -24,7 +25,7 @@ def sgd(obj, optimizer, x, score = None, lr = 1e-3, num_epoch = 20):
         return err, acc, times, epochs, "SGD", x
     return err, times, epochs, "SGD"
 
-
+# @profile
 def sngd(obj, grad, x, score = None, lr = 1e-3, num_epoch = 20):
     iter_num = 0
     err = [obj(x)]

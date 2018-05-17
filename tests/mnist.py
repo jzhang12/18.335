@@ -61,28 +61,28 @@ pos = ['0']
 neg = ['1']
 
 ds = np.loadtxt('data/mnist_digit_'+pos[0]+'.csv')
-train = ds[:350,:]
-test = ds[350:500,:]
+train = ds[:500,:]
+# test = ds[350:500,:]
 
 # load data from csv files
 for num in pos[1:]:
     ds = np.loadtxt('data/mnist_digit_'+num+'.csv')
-    train = np.vstack((train,ds[:350,:]))
-    test = np.vstack((test,ds[350:500,:]))
+    train = np.vstack((train,ds[:500,:]))
+    # test = np.vstack((test,ds[350:500,:]))
 
 for num in neg:
     ds = np.loadtxt('data/mnist_digit_'+num+'.csv')
-    train = np.vstack((train,ds[:350,:]))
-    test = np.vstack((test,ds[350:500,:]))
+    train = np.vstack((train,ds[:500,:]))
+    # test = np.vstack((test,ds[350:500,:]))
 
 print "Finished Loading Data"
 
 train = 2.0*train/255.0-1
 # dev = 2.0*dev/255.0-1
-test = 2.0*test/255.0-1
+# test = 2.0*test/255.0-1
 
-train_labels = np.vstack((np.ones((350*len(pos), 1)), -1*np.ones((350*len(neg), 1))))
-test_labels = np.vstack((np.ones((150*len(pos), 1)), -1*np.ones((150*len(neg), 1))))
+train_labels = np.vstack((np.ones((500*len(pos), 1)), -1*np.ones((500*len(neg), 1))))
+# test_labels = np.vstack((np.ones((150*len(pos), 1)), -1*np.ones((150*len(neg), 1))))
 
 score_fxn = score_fxn_fact(train, train_labels)
 
@@ -93,16 +93,16 @@ nesterov_opt = h.nesterov_optimizer(train, train_labels, sgrad, batch_size = 128
 adam_opt = h.adam_optimizer(train, train_labels, sgrad, batch_size = 128)
 
 w_0 = np.zeros(train.shape[1]+1)
-err_sgd, acc_sgd, times_sgd, epochs_sgd, title_sgd, w_sgd = sgd.sgd(obj, sgd_opt, w_0, score_fxn, num_epoch = 5)
+err_sgd, acc_sgd, times_sgd, epochs_sgd, title_sgd, w_sgd = sgd.sgd(obj, sgd_opt, w_0, score_fxn, num_epoch = 20)
 
 w_0 = np.zeros(train.shape[1]+1)
-err_sngd, acc_sngd, times_sngd, epochs_sngd, title_sngd, w_sngd = sgd.sngd(obj, nesterov_opt, w_0, score_fxn, num_epoch = 5)
+err_sngd, acc_sngd, times_sngd, epochs_sngd, title_sngd, w_sngd = sgd.sngd(obj, nesterov_opt, w_0, score_fxn, num_epoch = 20)
 
 w_0 = np.zeros(train.shape[1]+1)
-err_adam, acc_adam, times_adam, epochs_adam, title_adam, w_adam = adam.adam(obj, adam_opt, w_0, score_fxn, num_epoch = 5)
+err_adam, acc_adam, times_adam, epochs_adam, title_adam, w_adam = adam.adam(obj, adam_opt, w_0, score_fxn, num_epoch = 20)
 
 w_0 = np.zeros(train.shape[1]+1)
-err_scgd, acc_scgd, times_scgd, epochs_scgd, title_scgd, w_scgd = cgd.scgd(obj, scgd_opt, w_0, score_fxn, num_epoch = 5)
+err_scgd, acc_scgd, times_scgd, epochs_scgd, title_scgd, w_scgd = cgd.scgd(obj, scgd_opt, w_0, score_fxn, num_epoch = 20)
 
 max_time = max(max(times_sgd), max(times_sngd), max(times_adam))
 
@@ -158,21 +158,21 @@ plt.ylabel('Training Accuracy')
 plt.xlabel('Time')
 plt.show()
 
-predict_test_sgd = predictLR(test, w_sgd)
-print "SGD: ",
-print scoreLR(predict_test_sgd, test_labels)
-print
+# predict_test_sgd = predictLR(test, w_sgd)
+# print "SGD: ",
+# print scoreLR(predict_test_sgd, test_labels)
+# print
 
-predict_test_sngd = predictLR(test, w_sngd)
-print "SNGD: ",
-print scoreLR(predict_test_sngd, test_labels)
-print
+# predict_test_sngd = predictLR(test, w_sngd)
+# print "SNGD: ",
+# print scoreLR(predict_test_sngd, test_labels)
+# print
 
-predict_test_scgd = predictLR(test, w_scgd)
-print "SCGD: ",
-print scoreLR(predict_test_scgd, test_labels)
-print
+# predict_test_scgd = predictLR(test, w_scgd)
+# print "SCGD: ",
+# print scoreLR(predict_test_scgd, test_labels)
+# print
 
-predict_test_adam = predictLR(test, w_adam)
-print "ADAM: ",
-print scoreLR(predict_test_adam, test_labels)
+# predict_test_adam = predictLR(test, w_adam)
+# print "ADAM: ",
+# print scoreLR(predict_test_adam, test_labels)
