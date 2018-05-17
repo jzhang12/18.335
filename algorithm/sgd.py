@@ -21,7 +21,7 @@ def sgd(obj, optimizer, x, score = None, lr = 1e-3, num_epoch = 20):
         times.append(time.time() - start)
         epochs.append(iter_num)
     if score is not None:
-        return err, acc, times, epochs, "SGD"
+        return err, acc, times, epochs, "SGD", x
     return err, times, epochs, "SGD"
 
 
@@ -46,5 +46,5 @@ def sngd(obj, grad, x, score = None, lr = 1e-3, num_epoch = 20):
         times.append(time.time() - start)
         epochs.append(iter_num)
     if score is not None:
-        return err, acc, times, epochs, "SNGD"
+        return err, acc, times, epochs, "SNGD", x
     return err, times, epochs, "SNGD"

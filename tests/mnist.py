@@ -22,7 +22,7 @@ def finite_diff_fact(obj):
         return central
     return finite_diff
 
-def logistic_fact(A, b, l, batch_size = 10):
+def logistic_fact(A, b, l):
     n, m = A.shape
     A_temp = A
     A = np.ones((A.shape[0], A.shape[1]+1))
@@ -61,21 +61,18 @@ pos = ['0']
 neg = ['1']
 
 ds = np.loadtxt('data/mnist_digit_'+pos[0]+'.csv')
-train = ds[:200,:]
-# dev = ds[200:350,:]
+train = ds[:350,:]
 test = ds[350:500,:]
 
 # load data from csv files
 for num in pos[1:]:
     ds = np.loadtxt('data/mnist_digit_'+num+'.csv')
-    train = np.vstack((train,ds[:200,:]))
-    # dev = np.vstack((dev,ds[200:350,:]))
+    train = np.vstack((train,ds[:350,:]))
     test = np.vstack((test,ds[350:500,:]))
 
 for num in neg:
     ds = np.loadtxt('data/mnist_digit_'+num+'.csv')
-    train = np.vstack((train,ds[:200,:]))
-    # dev = np.vstack((dev,ds[200:350,:]))
+    train = np.vstack((train,ds[:350,:]))
     test = np.vstack((test,ds[350:500,:]))
 
 print "Finished Loading Data"
@@ -84,53 +81,98 @@ train = 2.0*train/255.0-1
 # dev = 2.0*dev/255.0-1
 test = 2.0*test/255.0-1
 
-train_labels = np.vstack((np.ones((200*len(pos), 1)), -1*np.ones((200*len(neg), 1))))
-# dev_labels = np.vstack((np.ones((150*len(pos), 1)), -1*np.ones((150*len(neg), 1))))
+train_labels = np.vstack((np.ones((350*len(pos), 1)), -1*np.ones((350*len(neg), 1))))
 test_labels = np.vstack((np.ones((150*len(pos), 1)), -1*np.ones((150*len(neg), 1))))
 
 score_fxn = score_fxn_fact(train, train_labels)
 
 obj, grad, sgrad = logistic_fact(train, train_labels, 0.0)
-sgd_opt = h.stochastic_optimizer(train, train_labels, sgrad)
-nesterov_opt = h.nesterov_optimizer(train, train_labels, sgrad)
-adam_opt = h.adam_optimizer(train, train_labels, sgrad)
+sgd_opt = h.stochastic_optimizer(train, train_labels, sgrad, batch_size = 128)
+scgd_opt = h.stochastic_conj_gradient(train, train_labels, sgrad, batch_size = 128)
+nesterov_opt = h.nesterov_optimizer(train, train_labels, sgrad, batch_size = 128)
+adam_opt = h.adam_optimizer(train, train_labels, sgrad, batch_size = 128)
+
 w_0 = np.zeros(train.shape[1]+1)
+err_sgd, acc_sgd, times_sgd, epochs_sgd, title_sgd, w_sgd = sgd.sgd(obj, sgd_opt, w_0, score_fxn, num_epoch = 5)
 
-err_sgd, acc_sgd, times_sgd, epochs_sgd, title_sgd = sgd.sgd(obj, sgd_opt, w_0, score_fxn)
-err_sngd, acc_sngd, times_sngd, epochs_sngd, title_sngd = sgd.sngd(obj, nesterov_opt, w_0, score_fxn)
-err_adam, acc_adam, times_adam, epochs_adam, title_adam = adam.adam(obj, adam_opt, w_0, score_fxn)
+w_0 = np.zeros(train.shape[1]+1)
+err_sngd, acc_sngd, times_sngd, epochs_sngd, title_sngd, w_sngd = sgd.sngd(obj, nesterov_opt, w_0, score_fxn, num_epoch = 5)
 
-title = "MNIST Dataset: " + " Error vs Epoch"
-plt.plot(epochs_sgd, err_sgd, label = title_sgd)
-plt.plot(epochs_sngd, err_sngd, label = title_sngd)
-plt.plot(epochs_adam, err_adam, label = title_adam)
+w_0 = np.zeros(train.shape[1]+1)
+err_adam, acc_adam, times_adam, epochs_adam, title_adam, w_adam = adam.adam(obj, adam_opt, w_0, score_fxn, num_epoch = 5)
+
+w_0 = np.zeros(train.shape[1]+1)
+err_scgd, acc_scgd, times_scgd, epochs_scgd, title_scgd, w_scgd = cgd.scgd(obj, scgd_opt, w_0, score_fxn, num_epoch = 5)
+
+max_time = max(max(times_sgd), max(times_sngd), max(times_adam))
+
+i = 0
+while i < len(times_scgd):
+    if times_scgd[i] > max_time:
+        i += 1
+        break
+    i += 1
+print i
+
+title = "MNIST Dataset: " + " Training Loss vs Epoch"
+plt.plot(epochs_sgd, err_sgd, "b-", label = title_sgd)
+plt.plot(epochs_scgd, err_scgd, "r-", label = title_scgd)
+plt.plot(epochs_sngd, err_sngd, "g-", label = title_sngd)
+plt.plot(epochs_adam, err_adam, "m-", label = title_adam)
 plt.legend()
 plt.title(title)
+plt.ylabel('Training Loss')
+plt.xlabel('Epoch')
 plt.show()
 
-title = "MNIST Dataset: " + " Error vs Time"
-plt.plot(times_sgd, err_sgd, label = title_sgd)
-plt.plot(times_sngd, err_sngd, label = title_sngd)
-plt.plot(times_adam, err_adam, label = title_adam)
+title = "MNIST Dataset: " + " Training Loss vs Time"
+plt.plot(times_sgd, err_sgd, "b-", label = title_sgd)
+plt.plot(times_scgd[:i], err_scgd[:i], "r-", label = title_scgd)
+plt.plot(times_sngd, err_sngd, "g-", label = title_sngd)
+plt.plot(times_adam, err_adam, "m-", label = title_adam)
 plt.legend()
 plt.title(title)
+plt.ylabel('Training Loss')
+plt.xlabel('Time')
 plt.show()
 
-title = "MNIST Dataset: " + " Accuracy vs Epoch"
-plt.plot(epochs_sgd, acc_sgd, label = title_sgd)
-plt.plot(epochs_sngd, acc_sngd, label = title_sngd)
-plt.plot(epochs_adam, acc_adam, label = title_adam)
+title = "MNIST Dataset: " + " Training Accuracy vs Epoch"
+plt.plot(epochs_sgd, acc_sgd, "b-", label = title_sgd)
+plt.plot(epochs_scgd, acc_scgd, "r-", label = title_scgd)
+plt.plot(epochs_sngd, acc_sngd, "g-", label = title_sngd)
+plt.plot(epochs_adam, acc_adam, "m-", label = title_adam)
 plt.legend()
 plt.title(title)
+plt.ylabel('Training Accuracy')
+plt.xlabel('Epoch')
 plt.show()
 
-title = "MNIST Dataset: " + " Accuracy vs Time"
-plt.plot(times_sgd, acc_sgd, label = title_sgd)
-plt.plot(times_sngd, acc_sngd, label = title_sngd)
-plt.plot(times_adam, acc_adam, label = title_adam)
+title = "MNIST Dataset: " + " Training Accuracy vs Time"
+plt.plot(times_sgd, acc_sgd, "b-", label = title_sgd)
+plt.plot(times_scgd[:i], acc_scgd[:i], "r-", label = title_scgd)
+plt.plot(times_sngd, acc_sngd, "g-", label = title_sngd)
+plt.plot(times_adam, acc_adam, "m-", label = title_adam)
 plt.legend()
 plt.title(title)
+plt.ylabel('Training Accuracy')
+plt.xlabel('Time')
 plt.show()
 
-predict_test = predictLR(test, x1)
-print scoreLR(predict_test, test_labels)
+predict_test_sgd = predictLR(test, w_sgd)
+print "SGD: ",
+print scoreLR(predict_test_sgd, test_labels)
+print
+
+predict_test_sngd = predictLR(test, w_sngd)
+print "SNGD: ",
+print scoreLR(predict_test_sngd, test_labels)
+print
+
+predict_test_scgd = predictLR(test, w_scgd)
+print "SCGD: ",
+print scoreLR(predict_test_scgd, test_labels)
+print
+
+predict_test_adam = predictLR(test, w_adam)
+print "ADAM: ",
+print scoreLR(predict_test_adam, test_labels)

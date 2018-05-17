@@ -26,5 +26,5 @@ def adam(obj, grad, x, score = None, lr = 1e-3, num_epoch = 20):
         times.append(time.time() - start)
         epochs.append(epoch_num)
     if score is not None:
-        return err, acc, times, epochs, "ADAM"
+        return err, acc, times, epochs, "ADAM", x
     return err, times, epochs, "ADAM"

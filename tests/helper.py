@@ -22,15 +22,6 @@ def toy_grad_fact(A, b):
         return -2*np.dot(np.transpose(A), b-A.dot(x))
     return toy_grad
 
-def stochastic_toy_grad_i_fact(A, b, batch_size = 256):
-    n, m = A.shape
-    ids = list(range(n))
-
-    def stochastic_toy_grad_i(x):
-        batch = np.random.choice(n, batch_size, replace = False)
-        return -2*np.dot(np.transpose(A[batch]), (b[batch]-np.dot(A[batch], x)))/batch_size
-    return stochastic_toy_grad_i
-
 def gradient_fact(A,b):
     def batch_gradient(x, batch):
         return -2 * np.dot(np.transpose(A[batch]), (b[batch]-np.dot(A[batch], x)))
@@ -52,12 +43,13 @@ def stochastic_optimizer(A, b, gradient, batch_size = 256):
         return x
     return stochastic_optimize_single
 
-def conj_gradient(A, b):
+def stochastic_conj_gradient(A, b, gradient, batch_size = 256):
     n, m = A.shape
 
-    def conj_gradient_single(x):
-        return -2*np.dot(np.transpose(A), (b-np.dot(A, x)))
-    return conj_gradient_single
+    def stochastic_conj_gradient_single(x):
+        batch = np.random.choice(n, batch_size, replace = False)
+        return gradient(x,batch)/batch_size
+    return stochastic_conj_gradient_single
 
 def nesterov_optimizer(A, b, gradient, batch_size = 256, momentum = 0.9):
     n, m = A.shape
@@ -99,39 +91,8 @@ def adam_optimizer(A, b, gradient, batch_size = 256, beta_1 = 0.9, beta_2 = 0.99
         return x, batch_num, m, v
     return adam_optimize_single
 
-
-def run_experiment(A, b, x, algo_string, data_set):
-    obj = toy_obj_fact(A, b)
-    if algo_string == "SGD":
-        algo = sgd.sgd
-        grad = stochastic_optimizer(A,b)
-    elif algo_string == "GD":
-        algo = gd.gd
-        grad = toy_grad_fact(A, b)
-    elif algo_string == "CGD":
-        algo = cgd.cgd
-        grad = toy_grad_fact(A, b)
-    elif algo_string == "SCGD":
-        algo = cgd.scgd
-        grad = stochastic_toy_grad_i_fact(A, b)
-    elif algo_string == "ADAM":
-        algo = adam.adam
-        grad = stochastic_toy_grad_i_fact(A, b)
-    elif algo_string == "SNGD":
-        algo = sgd.sngd
-        grad = nesterov_optimizer(A, b)
-    else:
-        print("INVALID ALGO")
-        return
-    res, n, x1, title = algo(obj, grad, x, A)
-    title = data_set + " Dataset: "+ title + " Error vs Iteration"
-    plt.plot(res)
-    plt.title(title)
-    plt.show()
-
 def run_experiments(A, b, x, algos_list, data_set):
     obj = toy_obj_fact(A, b)
-    title_list = ""
     for algo_string in algos_list:
         if algo_string == "SGD":
             algo = sgd.sgd
@@ -142,7 +103,7 @@ def run_experiments(A, b, x, algos_list, data_set):
             algo = cgd.scgd
             color = 'b-'
             gradient = gradient_fact(A,b)
-            grad = stochastic_toy_grad_i_fact(A,b)
+            grad = stochastic_conj_gradient(A,b)
         elif algo_string == "ADAM":
             algo = adam.adam
             color = 'g-'
@@ -157,11 +118,70 @@ def run_experiments(A, b, x, algos_list, data_set):
             print("INVALID ALGO")
             return
         err, times, epochs, title = algo(obj, grad, x)
-        plt.plot(times, err, color, label = title)
-        title_list += title + ", "
-    title = data_set + " Dataset: "+ title_list+ "Error vs Iteration"
+        plt.plot(epochs, err, color, label = title)
+    title = data_set + " Dataset: Error vs Epoch"
     plt.title(title)
     plt.ylabel('Error')
-    plt.xlabel('Time')
+    plt.xlabel('Epoch')
     plt.legend()
     plt.show()
+
+
+def run_experiment(A, b, x, data_set, plot = True):
+    obj = toy_obj_fact(A, b)
+    gradient = gradient_fact(A,b)
+    sgd_grad = stochastic_optimizer(A,b,gradient)
+    scgd_grad = stochastic_conj_gradient(A,b,gradient)
+    adam_grad = adam_optimizer(A,b,gradient)
+    sngd_grad = nesterov_optimizer(A,b,gradient)
+
+    output = {}
+
+    x_in = copy(x)
+    sgd_err, sgd_times, sgd_epochs, sgd_title = sgd.sgd(obj, sgd_grad, x_in)
+    output["SGD"] = (sgd_err, sgd_times, sgd_epochs)
+    x_in = copy(x)
+    scgd_err, scgd_times, scgd_epochs, scgd_title = cgd.scgd(obj, scgd_grad, x_in)
+    output["SCGD"] = (scgd_err, scgd_times, scgd_epochs)
+    x_in = copy(x)
+    sngd_err, sngd_times, sngd_epochs, sngd_title = sgd.sngd(obj, sngd_grad, x_in)
+    output["SNGD"] = (sngd_err, sngd_times, sngd_epochs)
+    x_in = copy(x)
+    adam_err, adam_times, adam_epochs, adam_title = adam.adam(obj, adam_grad, x_in)
+    output["ADAM"] = (adam_err, adam_times, adam_epochs)
+
+    if plot:
+        plt.plot(sgd_epochs, sgd_err, "b-", label = sgd_title)
+        plt.plot(scgd_epochs, scgd_err, "r-", label = scgd_title)
+        plt.plot(sngd_epochs, sngd_err, "g-", label = sngd_title)
+        plt.plot(adam_epochs, adam_err, "m-", label = adam_title)
+
+        title_epoch = data_set + " Dataset: Error vs Epoch"
+        plt.title(title_epoch)
+        plt.ylabel('Error')
+        plt.xlabel('Epoch')
+        plt.legend()
+        plt.show()
+
+        max_time = max(max(sgd_times), max(sngd_times), max(adam_times))
+        i = 0
+        while i < len(scgd_times):
+            if scgd_times[i] > max_time:
+                i += 1
+                break
+            i += 1
+        print i
+
+        plt.plot(sgd_times, sgd_err, "b-", label = sgd_title)
+        plt.plot(scgd_times[:i], scgd_err[:i], "r-", label = scgd_title)
+        plt.plot(sngd_times, sngd_err, "g-", label = sngd_title)
+        plt.plot(adam_times, adam_err, "m-", label = adam_title)
+
+        title_time = data_set + " Dataset: Error vs Time"
+        plt.title(title_time)
+        plt.ylabel('Error')
+        plt.xlabel('Time')
+        plt.legend()
+        plt.show()
+
+    return output
