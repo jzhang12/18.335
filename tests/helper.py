@@ -62,9 +62,9 @@ def nesterov_optimizer(A, b, gradient, batch_size = 256, momentum = 0.9):
             left = i * batch_size
             right = min((i + 1) * batch_size, n)
             batch = ids[left:right]
-            delta = gradient(x-momentum*prev_grads,batch)/(right - left)
-            grad = momentum * prev_grads + lr * delta
-            x += grad
+            delta = gradient(x,batch)/(right - left)
+            grad = momentum * prev_grads - lr * delta
+            x += -momentum * prev_grads + (1 + momentum) * grad
             prev_grads = grad
 
         return x, prev_grads
@@ -126,7 +126,7 @@ def run_experiments(A, b, x, algos_list, data_set):
     plt.legend()
     plt.show()
 
-
+# Use this
 def run_experiment(A, b, x, data_set, plot = True):
     obj = toy_obj_fact(A, b)
     gradient = gradient_fact(A,b)

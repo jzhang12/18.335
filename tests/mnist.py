@@ -55,42 +55,31 @@ def score_fxn_fact(data, label):
         return scoreLR(predicted, label)
     return score_fxn
 
-# pos = ['0', '2', '4', '6', '8']
-# neg = ['1', '3', '5', '7', '9']
-pos = ['0']
-neg = ['1']
-
-ds = np.loadtxt('data/mnist_digit_'+pos[0]+'.csv')
+ds = np.loadtxt('data/mnist_digit_0.csv')
 train = ds[:500,:]
-# test = ds[350:500,:]
+test = ds[500:750,:]
 
-# load data from csv files
-for num in pos[1:]:
-    ds = np.loadtxt('data/mnist_digit_'+num+'.csv')
-    train = np.vstack((train,ds[:500,:]))
-    # test = np.vstack((test,ds[350:500,:]))
 
-for num in neg:
-    ds = np.loadtxt('data/mnist_digit_'+num+'.csv')
-    train = np.vstack((train,ds[:500,:]))
-    # test = np.vstack((test,ds[350:500,:]))
+ds = np.loadtxt('data/mnist_digit_1.csv')
+train = np.vstack((train,ds[:500,:]))
+test = np.vstack((test,ds[500:750,:]))
 
 print "Finished Loading Data"
 
+# Normalize
 train = 2.0*train/255.0-1
-# dev = 2.0*dev/255.0-1
-# test = 2.0*test/255.0-1
+test = 2.0*test/255.0-1
 
-train_labels = np.vstack((np.ones((500*len(pos), 1)), -1*np.ones((500*len(neg), 1))))
-# test_labels = np.vstack((np.ones((150*len(pos), 1)), -1*np.ones((150*len(neg), 1))))
+train_labels = np.vstack((np.ones((500, 1)), -1*np.ones((500, 1))))
+test_labels = np.vstack((np.ones((250, 1)), -1*np.ones((250, 1))))
 
 score_fxn = score_fxn_fact(train, train_labels)
 
 obj, grad, sgrad = logistic_fact(train, train_labels, 0.0)
-sgd_opt = h.stochastic_optimizer(train, train_labels, sgrad, batch_size = 128)
-scgd_opt = h.stochastic_conj_gradient(train, train_labels, sgrad, batch_size = 128)
-nesterov_opt = h.nesterov_optimizer(train, train_labels, sgrad, batch_size = 128)
-adam_opt = h.adam_optimizer(train, train_labels, sgrad, batch_size = 128)
+sgd_opt = h.stochastic_optimizer(train, train_labels, sgrad, batch_size = 256)
+scgd_opt = h.stochastic_conj_gradient(train, train_labels, sgrad, batch_size = 512)
+nesterov_opt = h.nesterov_optimizer(train, train_labels, sgrad, batch_size = 256)
+adam_opt = h.adam_optimizer(train, train_labels, sgrad, batch_size = 256)
 
 w_0 = np.zeros(train.shape[1]+1)
 err_sgd, acc_sgd, times_sgd, epochs_sgd, title_sgd, w_sgd = sgd.sgd(obj, sgd_opt, w_0, score_fxn, num_epoch = 20)
@@ -114,6 +103,17 @@ while i < len(times_scgd):
     i += 1
 print i
 
+SMALL_SIZE = 20
+MEDIUM_SIZE = 22
+BIGGER_SIZE = 24
+
+plt.rc('font', size=SMALL_SIZE)
+plt.rc('axes', titlesize=SMALL_SIZE)
+plt.rc('axes', labelsize=MEDIUM_SIZE)
+plt.rc('xtick', labelsize=SMALL_SIZE)
+plt.rc('ytick', labelsize=SMALL_SIZE)
+plt.rc('legend', fontsize=SMALL_SIZE)
+plt.rc('figure', titlesize=BIGGER_SIZE)
 title = "MNIST Dataset: " + " Training Loss vs Epoch"
 plt.plot(epochs_sgd, err_sgd, "b-", label = title_sgd)
 plt.plot(epochs_scgd, err_scgd, "r-", label = title_scgd)
@@ -125,6 +125,13 @@ plt.ylabel('Training Loss')
 plt.xlabel('Epoch')
 plt.show()
 
+plt.rc('font', size=SMALL_SIZE)
+plt.rc('axes', titlesize=SMALL_SIZE)
+plt.rc('axes', labelsize=MEDIUM_SIZE)
+plt.rc('xtick', labelsize=SMALL_SIZE)
+plt.rc('ytick', labelsize=SMALL_SIZE)
+plt.rc('legend', fontsize=SMALL_SIZE)
+plt.rc('figure', titlesize=BIGGER_SIZE)
 title = "MNIST Dataset: " + " Training Loss vs Time"
 plt.plot(times_sgd, err_sgd, "b-", label = title_sgd)
 plt.plot(times_scgd[:i], err_scgd[:i], "r-", label = title_scgd)
@@ -136,6 +143,13 @@ plt.ylabel('Training Loss')
 plt.xlabel('Time')
 plt.show()
 
+plt.rc('font', size=SMALL_SIZE)
+plt.rc('axes', titlesize=SMALL_SIZE)
+plt.rc('axes', labelsize=MEDIUM_SIZE)
+plt.rc('xtick', labelsize=SMALL_SIZE)
+plt.rc('ytick', labelsize=SMALL_SIZE)
+plt.rc('legend', fontsize=SMALL_SIZE)
+plt.rc('figure', titlesize=BIGGER_SIZE)
 title = "MNIST Dataset: " + " Training Accuracy vs Epoch"
 plt.plot(epochs_sgd, acc_sgd, "b-", label = title_sgd)
 plt.plot(epochs_scgd, acc_scgd, "r-", label = title_scgd)
@@ -147,6 +161,13 @@ plt.ylabel('Training Accuracy')
 plt.xlabel('Epoch')
 plt.show()
 
+plt.rc('font', size=SMALL_SIZE)
+plt.rc('axes', titlesize=SMALL_SIZE)
+plt.rc('axes', labelsize=MEDIUM_SIZE)
+plt.rc('xtick', labelsize=SMALL_SIZE)
+plt.rc('ytick', labelsize=SMALL_SIZE)
+plt.rc('legend', fontsize=SMALL_SIZE)
+plt.rc('figure', titlesize=BIGGER_SIZE)
 title = "MNIST Dataset: " + " Training Accuracy vs Time"
 plt.plot(times_sgd, acc_sgd, "b-", label = title_sgd)
 plt.plot(times_scgd[:i], acc_scgd[:i], "r-", label = title_scgd)
@@ -158,21 +179,21 @@ plt.ylabel('Training Accuracy')
 plt.xlabel('Time')
 plt.show()
 
-# predict_test_sgd = predictLR(test, w_sgd)
-# print "SGD: ",
-# print scoreLR(predict_test_sgd, test_labels)
-# print
+predict_test_sgd = predictLR(test, w_sgd)
+print "SGD: ",
+print scoreLR(predict_test_sgd, test_labels)
+print
 
-# predict_test_sngd = predictLR(test, w_sngd)
-# print "SNGD: ",
-# print scoreLR(predict_test_sngd, test_labels)
-# print
+predict_test_sngd = predictLR(test, w_sngd)
+print "SNGD: ",
+print scoreLR(predict_test_sngd, test_labels)
+print
 
-# predict_test_scgd = predictLR(test, w_scgd)
-# print "SCGD: ",
-# print scoreLR(predict_test_scgd, test_labels)
-# print
+predict_test_scgd = predictLR(test, w_scgd)
+print "SCGD: ",
+print scoreLR(predict_test_scgd, test_labels)
+print
 
-# predict_test_adam = predictLR(test, w_adam)
-# print "ADAM: ",
-# print scoreLR(predict_test_adam, test_labels)
+predict_test_adam = predictLR(test, w_adam)
+print "ADAM: ",
+print scoreLR(predict_test_adam, test_labels)

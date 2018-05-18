@@ -3,7 +3,7 @@ import helper as h
 import random
 import matplotlib.pyplot as plt
 
-n = 3
+n = 5
 
 output = {}
 
@@ -79,9 +79,9 @@ for i in xrange(1, n):
 	idata = interpolate(time, err, interpolated_time)
 	adam_err_time += idata/n
 
-SMALL_SIZE = 14
-MEDIUM_SIZE = 16
-BIGGER_SIZE = 18
+SMALL_SIZE = 20
+MEDIUM_SIZE = 22
+BIGGER_SIZE = 24
 
 plt.rc('font', size=SMALL_SIZE)
 plt.rc('axes', titlesize=SMALL_SIZE)
@@ -90,13 +90,9 @@ plt.rc('xtick', labelsize=SMALL_SIZE)
 plt.rc('ytick', labelsize=SMALL_SIZE)
 plt.rc('legend', fontsize=SMALL_SIZE)
 plt.rc('figure', titlesize=BIGGER_SIZE)
-# plt.plot(sgd_epochs, sgd_err, "b-", label = sgd_title)
-# plt.plot(scgd_epochs, scgd_err, "r-", label = scgd_title)
-# plt.plot(sngd_epochs, sngd_err, "g-", label = sngd_title)
-# plt.plot(adam_epochs, adam_err, "m-", label = adam_title)
 
 plt.plot(epoch, sgd_err_epoch, "b-", label = "SGD")
-# plt.plot(epoch, scgd_err_epoch, "r-", label = "SCGD")
+plt.plot(epoch, scgd_err_epoch, "r-", label = "SCGD")
 plt.plot(epoch, sngd_err_epoch, "g-", label = "SNGD")
 plt.plot(epoch, adam_err_epoch, "m-", label = "ADAM")
 
@@ -107,16 +103,9 @@ plt.xlabel('Epoch')
 plt.legend()
 plt.show()
 
-# i = 0
-# while i < len(scgd_times):
-#     if scgd_interpolated_time[i] > max_time:
-#         i += 1
-#         break
-#     i += 1
-# print i
-SMALL_SIZE = 14
-MEDIUM_SIZE = 16
-BIGGER_SIZE = 18
+SMALL_SIZE = 20
+MEDIUM_SIZE = 22
+BIGGER_SIZE = 24
 
 plt.rc('font', size=SMALL_SIZE)
 plt.rc('axes', titlesize=SMALL_SIZE)
@@ -125,13 +114,9 @@ plt.rc('xtick', labelsize=SMALL_SIZE)
 plt.rc('ytick', labelsize=SMALL_SIZE)
 plt.rc('legend', fontsize=SMALL_SIZE)
 plt.rc('figure', titlesize=BIGGER_SIZE)
-# plt.plot(sgd_epochs, sgd_err, "b-", label = sgd_title)
-# plt.plot(scgd_epochs, scgd_err, "r-", label = scgd_title)
-# plt.plot(sngd_epochs, sngd_err, "g-", label = sngd_title)
-# plt.plot(adam_epochs, adam_err, "m-", label = adam_title)
 
 plt.plot(interpolated_time, sgd_err_time, "b-", label = "SGD")
-# plt.plot(interpolated_time, scgd_err_time, "r-", label = "SCGD")
+plt.plot(interpolated_time, scgd_err_time, "r-", label = "SCGD")
 plt.plot(interpolated_time, sngd_err_time, "g-", label = "SNGD")
 plt.plot(interpolated_time, adam_err_time, "m-", label = "ADAM")
 
